@@ -1,30 +1,12 @@
 ﻿using ConcurrentPinger.Core.Models;
-using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace ConcurrentPinger.Core.Services;
 
-public class UrlPinger(HttpClient httpClient, ILogger<UrlPinger> logger)
+public class UrlPinger(IPingStrategy pingStrategy) : IUrlPinger
 {
     public async Task<UrlPingResult> PingAsync(string url)
-    {
-        try
-        {
-            var sw = Stopwatch.StartNew();
-            var response = await httpClient.GetAsync(url);
-            sw.Stop();
-
-            logger.LogInformation("Pinged {Url} in {Time}ms (Status: {StatusCode})", url, sw.ElapsedMilliseconds, response.StatusCode);
-
-            return new UrlPingResult(url, sw.ElapsedMilliseconds, response.IsSuccessStatusCode);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to ping {Url}", url);
-            return new UrlPingResult(url, 0, false, ex.Message);
-        }
-    }
+        => await pingStrategy.PingAsync(url);
 
     public async Task<List<UrlPingResult>> PingManyAsync(IEnumerable<string> urls, int maxConcurrency = 5)
     {

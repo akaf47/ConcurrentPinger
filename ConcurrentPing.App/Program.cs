@@ -15,7 +15,9 @@ var urls = new[]
 var host = Host.CreateDefaultBuilder()
     .ConfigureServices((context, services) =>
     {
-        services.AddHttpClient<UrlPinger>();
+        services.AddHttpClient<HttpPingStrategy>();
+        services.AddSingleton<IPingStrategy, HttpPingStrategy>();
+        services.AddSingleton<IUrlPinger, UrlPinger>();
         services.AddLogging(config => config.AddSimpleConsole(options =>
         {
             options.IncludeScopes = true;
@@ -26,7 +28,7 @@ var host = Host.CreateDefaultBuilder()
     .Build();
 
 using var scope = host.Services.CreateScope();
-var pinger = scope.ServiceProvider.GetRequiredService<UrlPinger>();
+var pinger = scope.ServiceProvider.GetRequiredService<IUrlPinger>();
 var results = await pinger.PingManyAsync(urls);
 
 Console.WriteLine("\n--- Summary ---");

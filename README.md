@@ -28,6 +28,8 @@ ConcurrentPinger is a .NET 9 console application that pings multiple URLs concur
 
 	dotnet run --project .\ConcurrentPing.App
 
+4. **Run the tests:**  
+	dotnet test
 
 ## Configuration
 
